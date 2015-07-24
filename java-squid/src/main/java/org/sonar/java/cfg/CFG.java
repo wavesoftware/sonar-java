@@ -25,6 +25,7 @@ import org.sonar.java.model.JavaTree;
 import org.sonar.plugins.java.api.tree.AssignmentExpressionTree;
 import org.sonar.plugins.java.api.tree.BinaryExpressionTree;
 import org.sonar.plugins.java.api.tree.BlockTree;
+import org.sonar.plugins.java.api.tree.ConditionalExpressionTree;
 import org.sonar.plugins.java.api.tree.ExpressionStatementTree;
 import org.sonar.plugins.java.api.tree.ExpressionTree;
 import org.sonar.plugins.java.api.tree.IdentifierTree;
@@ -114,7 +115,7 @@ public class CFG {
           build(arg);
         }
         break;
-      case IF_STATEMENT:
+      case IF_STATEMENT: {
         IfStatementTree ifStatementTree = (IfStatementTree) tree;
         Block next = currentBlock;
         // process else-branch
@@ -136,10 +137,28 @@ public class CFG {
         currentBlock = createBranch(ifStatementTree, thenBlock, elseBlock);
         buildCondition(ifStatementTree.condition(), thenBlock, elseBlock);
         break;
+      }
+      case CONDITIONAL_EXPRESSION: {
+        ConditionalExpressionTree cond = (ConditionalExpressionTree) tree;
+        Block next = currentBlock;
+        // process else-branch
+        ExpressionTree elseStatement = cond.falseExpression();
+        currentBlock = createBlock(next);
+        build(elseStatement);
+        Block elseBlock = currentBlock;
+        // process then-branch
+        currentBlock = createBlock(next);
+        build(cond.trueExpression());
+        Block thenBlock = currentBlock;
+        // process condition
+        currentBlock = createBranch(cond, thenBlock, elseBlock);
+        buildCondition(cond.condition(), thenBlock, elseBlock);
+        break;
+      }
       case VARIABLE:
         currentBlock.elements.add(tree);
         VariableTree variableTree = (VariableTree) tree;
-        if(variableTree.initializer() != null) {
+        if (variableTree.initializer() != null) {
           build(variableTree.initializer());
         }
         break;
@@ -149,7 +168,7 @@ public class CFG {
         currentBlock.elements.add(tree);
         build(binaryExpressionTree.rightOperand());
         build(binaryExpressionTree.leftOperand());
-      break;
+        break;
       case ASSIGNMENT:
         AssignmentExpressionTree assignmentExpressionTree = (AssignmentExpressionTree) tree;
         currentBlock.elements.add(tree);
