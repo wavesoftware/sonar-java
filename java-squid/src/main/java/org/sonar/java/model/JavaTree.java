@@ -85,6 +85,10 @@ public abstract class JavaTree implements Tree {
 
   public abstract Kind getKind();
 
+  public Kind kind() {
+    return getKind();
+  }
+
   /**
    * Creates iterator for children of this node.
    * Note that iterator may contain {@code null} elements.

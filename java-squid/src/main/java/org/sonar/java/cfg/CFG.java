@@ -215,7 +215,7 @@ public class CFG {
         out.println("B" + block.id + " (Exit) :");
       }
       int i = 0;
-      for (Tree tree : block.elements) {
+      for (Tree tree : block.elements()) {
         out.println("  " + i + ": " + syntaxNodeToDebugString((JavaTree) tree));
         i++;
       }

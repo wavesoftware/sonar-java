@@ -658,4 +658,5 @@ public interface Tree {
     }
   }
 
+  Kind kind();
 }

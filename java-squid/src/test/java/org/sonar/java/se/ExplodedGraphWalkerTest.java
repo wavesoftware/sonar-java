@@ -52,32 +52,29 @@ public class ExplodedGraphWalkerTest {
 
   @Test
   public void test() throws Exception {
-    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { Object a; void func() { if(a==null)\n a.toString();\n } } ");
-    assertThat(graphWalker.steps).isEqualTo(8);
+    getGraphWalker("class A  { Object a; void func() { if(a==null)\n a.toString();\n } } ");
     String output = out.toString();
+    System.out.println(output);
     assertThat(output).contains("Null pointer dereference at line 2");
   }
 
   @Test
   public void test_complex_condition() throws Exception {
-    ExplodedGraphWalker graphWalker = getGraphWalker("class A  \n{ Object a;\n void func() \n{ if(b == a &&\n a == null) \na.toString();\n } } ");
-    assertThat(graphWalker.steps).isEqualTo(15);
+    getGraphWalker("class A  \n{ Object a;\n void func() \n{ if(b == a &&\n a == null) \na.toString();\n } } ");
     String output = out.toString();
     assertThat(output).contains("Null pointer dereference at line 6");
   }
 
   @Test
   public void test_complex_condition_inverted() throws Exception {
-    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { Object a; void func() { if(null == a && b == a) \na.toString();\n } } ");
-    assertThat(graphWalker.steps).isEqualTo(15);
+    getGraphWalker("class A  { Object a; void func() { if(null == a && b == a) \na.toString();\n } } ");
     String output = out.toString();
     assertThat(output).contains("Null pointer dereference at line 2");
   }
 
   @Test
   public void test_reassignement() throws Exception {
-    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { Object a; Object b; void func() { if(b == null) {\na = b; \n a.toString();\n }} } ");
-    assertThat(graphWalker.steps).isEqualTo(10);
+    getGraphWalker("class A  { Object a; Object b; void func() { if(b == null) {\na = b; \n a.toString();\n }} } ");
     String output = out.toString();
     System.out.println(output);
     assertThat(output).contains("Null pointer dereference at line 3");
@@ -85,33 +82,34 @@ public class ExplodedGraphWalkerTest {
 
   @Test
   public void test_null_assignement() throws Exception {
-    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { void func(Object a) { a = null;\n a.toString();\n } } ");
-    assertThat(graphWalker.steps).isEqualTo(3);
+    getGraphWalker("class A  { void func(Object a) { a = null;\n a.toString();\n } } ");
     String output = out.toString();
-    System.out.println(output);
     assertThat(output).contains("Null pointer dereference at line 2");
   }
 
   @Test
   public void local_variable() throws Exception {
-    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { \nvoid func() {\n Object a;\n a.toString();\n }\n } ");
-    //Only two steps as we sink into the second because of the NPE.
-    assertThat(graphWalker.steps).isEqualTo(3);
+    getGraphWalker("class A  { \nvoid func() {\n Object a;\n a.toString();\n }\n } ");
     String output = out.toString();
-    System.out.println(output);
     assertThat(output).contains("Null pointer dereference at line 4");
   }
 
-//  @Test
-//  public void test_assign_null() throws Exception {
-//    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { \nvoid func(Object a) {\n if(a!=null){ a = null;\n a.toString();\n }}\n } ");
-//    //Only two steps as we sink into the second because of the NPE.
-//    assertThat(graphWalker.steps).isEqualTo(9);
-//    String output = out.toString();
-//    System.out.println(output);
-//    assertThat(output).contains("Null pointer dereference at line 4");
-//
-//  }
+  @Test
+  public void tracking_symbolic_value() throws Exception {
+    getGraphWalker("class A  { \nvoid func() {\n Object a = null; Object b = new Object(); b = a; if( b == null) {\n a.toString();}\n }\n } ");
+    String output = out.toString();
+    assertThat(output).contains("Null pointer dereference at line 4");
+  }
+
+  @Test
+  public void test_assign_null() throws Exception {
+    ExplodedGraphWalker graphWalker = getGraphWalker("class A  { \nvoid func(Object a) {\n if(a != null){ a = null;\n a.toString();\n }}\n } ");
+    //Only two steps as we sink into the second because of the NPE.
+    assertThat(graphWalker.steps).isEqualTo(9);
+    String output = out.toString();
+    assertThat(output).contains("Null pointer dereference at line 4");
+
+  }
 
   @Test
   public void test_null_pointer_check_unit_test() throws Exception {
@@ -126,9 +124,9 @@ public class ExplodedGraphWalkerTest {
         expectedLines.add(lineNb);
       }
     }
-    ExplodedGraphWalker graphWalker = getGraphWalker(Joiner.on("\n").join(unitTestNPE));
+    getGraphWalker(Joiner.on("\n").join(unitTestNPE));
     String output = out.toString();
-    System.out.println(output);
+//    System.out.println(output);
     Matcher matcher = pattern.matcher(output);
     List<Integer> issueRaised = Lists.newArrayList();
     while (matcher.find()) {
