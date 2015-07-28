@@ -19,6 +19,8 @@
  */
 package org.sonar.java.checks.targets;
 
+import java.util.stream.IntStream;
+
 public class UnusedPrivateMethod {
 
   public UnusedPrivateMethod(String s) {
@@ -51,26 +53,28 @@ public class UnusedPrivateMethod {
   }
 
   @SuppressWarnings("unused")
-  private int unusedPrivateMethod() {
+  private int unusedPrivateMethod() { // Noncompliant {{Remove this unused private "unusedPrivateMethod" method.}}
     return 1;
   }
-  private int unusedPrivateMethod(int a, String s) {
+  private int unusedPrivateMethod(int a, String s) { // Noncompliant {{Remove this unused private "unusedPrivateMethod" method.}}
     return 1;
   }
 
   public enum Attribute {
     ID("plop", "foo", true);
 
-    Attribute(String prettyName, String type, boolean hidden) {
-    }
+    Attribute(String prettyName, String type, boolean hidden) { }
 
-    Attribute(String prettyName, String[][] martrix, int i) {
+    private Attribute(String name) { } // Noncompliant
+
+    Attribute(String prettyName, String[][] martrix, int i) { // Noncompliant {{Remove this unused private "Attribute" constructor.}}
     }
 
   }
 
   private class A {
-    private A(){}
+    A(int a) {}
+    private A(){} // Noncompliant {{Remove this unused private "A" constructor.}}
     private <T> T foo(T t) {
       return null;
     }
@@ -78,6 +82,18 @@ public class UnusedPrivateMethod {
     public void bar() {
       foo("");
     }
+  }
+
+}
+
+class Lambdas {
+  void method(){
+    IntStream.range(1, 5)
+      .map((x)-> x*x )
+      .map(x -> x * x)
+      .map((int x) -> x * x)
+      .map((x)-> x*x )
+    ;
   }
 
 }
