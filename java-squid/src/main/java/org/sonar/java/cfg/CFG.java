@@ -121,7 +121,7 @@ public class CFG {
           build(statementTree);
         }
         break;
-      case RETURN_STATEMENT:{
+      case RETURN_STATEMENT: {
         ReturnStatementTree s = (ReturnStatementTree) tree;
         currentBlock = createUnconditionalJump(s, exitBlock);
         ExpressionTree expression = s.expression();
@@ -233,7 +233,7 @@ public class CFG {
         break;
       }
       case SWITCH_STATEMENT: {
-        //FIXME useless node created for default cases.
+        // FIXME useless node created for default cases.
         SwitchStatementTree switchStatementTree = (SwitchStatementTree) tree;
         Block switchSuccessor = currentBlock;
         // process condition
