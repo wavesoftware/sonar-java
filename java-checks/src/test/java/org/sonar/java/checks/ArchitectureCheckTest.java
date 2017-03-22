@@ -56,4 +56,12 @@ public class ArchitectureCheckTest {
     JavaCheckVerifier.verify("src/test/files/checks/ArchitectureSkipSingleFolder.java", check);
     JavaCheckVerifier.verifyNoIssue("src/test/files/checks/ArchitectureSkipSingleFolderOK.java", check);
   }
+
+  @Test
+  public void testDeepJDKReference() {
+    ArchitectureCheck check = new ArchitectureCheck();
+    check.fromClasses = "**.targets.**";
+    check.toClasses = "java.util.Vector, java.util.Hashtable, java.util.Enumeration";
+    JavaCheckVerifier.verifyNoIssue("src/test/files/checks/ArchitectureUseProperties.java", check);
+  }
 }
